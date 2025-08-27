@@ -25,8 +25,12 @@
 
 <div style="margin-top: 20px;">
   <% if @order.status == "pending" %>
-    <%= link_to "결제하기", new_payment_path(order_id: @order.id), 
+    <%= link_to "결제하기", new_payment_path(order_id: @order.id), data: { turbo: false },
         style: "padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 3px;" %>
+  <% else %>
+    <%= render 'payments/receipt_links', order: @order %>
   <% end %>
+</div>
+<div style="margin-top: 20px;">
   <%= link_to "목록으로", orders_path, style: "margin-left: 10px;" %>
 </div>

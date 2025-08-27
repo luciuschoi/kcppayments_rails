@@ -1,0 +1,31 @@
+<% if order.status == "paid" %>
+  <%= link_to "📄 자체 영수증", receipt_payment_path(order), 
+      target: "_blank",
+      style: "margin-right: 10px; padding: 10px 20px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 3px;" %>
+  
+  <% if order.kcp_receipt_available? %>
+    <% if order.real_kcp_transaction? %>
+      <%= link_to "🏦 KCP 공식 영수증", order.kcp_receipt_url, 
+          target: "_blank",
+          style: "padding: 10px 20px; background-color: #FF9800; color: white; text-decoration: none; border-radius: 3px;" %>
+    <% else %>
+      <%= link_to "🏦 KCP 공식 영수증 (데모)", order.kcp_receipt_url, 
+          target: "_blank",
+          onclick: "alert('이는 데모/테스트 거래로, KCP 서버에 실제 거래 내역이 없어 \"해당거래 내역이 없다\" 메시지가 표시될 수 있습니다. 📄 자체 영수증을 이용해주세요.'); return true;",
+          style: "padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 3px;" %>
+    <% end %>
+  <% end %>
+  
+  <% if order.kcp_receipt_available? %>
+    <div style="margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 5px; font-size: 14px; color: #6c757d;">
+      💡 <strong>영수증 안내:</strong><br>
+      • <strong>📄 자체 영수증</strong>: 즉시 확인 가능한 상세 영수증 ⭐<strong>추천</strong><br>
+      <% if order.real_kcp_transaction? %>
+      • <strong>🏦 KCP 공식 영수증</strong>: KCP에서 제공하는 공식 매출전표
+      <% else %>
+      • <strong>🏦 KCP 공식 영수증 (데모)</strong>: 테스트 환경용 (실제 거래 내역 없음)<br>
+      <small style="color: #dc3545;">⚠️ 데모/테스트 거래로 인해 "해당거래 내역이 없다" 메시지가 표시될 수 있습니다.</small>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

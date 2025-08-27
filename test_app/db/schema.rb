@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_27_075913) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_27_121258) do
   create_table "orders", force: :cascade do |t|
     t.string "order_no"
     t.string "product_name"
@@ -22,5 +22,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_27_075913) do
     t.integer "tax_free_amount"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "kcp_transaction_no"
+    t.text "kcp_receipt_url"
   end
 end

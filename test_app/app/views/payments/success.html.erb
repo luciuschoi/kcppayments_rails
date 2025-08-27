@@ -26,6 +26,9 @@
 
 <div style="margin-top: 20px;">
   <%= link_to "주문 상세보기", order_path(@order), 
-      style: "padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 3px;" %>
-  <%= link_to "주문 목록", orders_path, style: "margin-left: 10px;" %>
+      style: "padding: 10px 20px;margin-right: 10px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 3px;" %>
+  
+  <%= render 'receipt_links', order: @order %>
+  
+  <%= link_to "주문 목록", orders_path, style: "margin-left: 10px; margin-top: 15px; display: inline-block;" %>
 </div>

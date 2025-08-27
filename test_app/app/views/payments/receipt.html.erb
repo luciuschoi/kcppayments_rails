@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>결제 영수증</title>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: white;
+    }
+    .receipt-container {
+      max-width: 600px;
+      margin: 0 auto;
+      border: 1px solid #ddd;
+      padding: 30px;
+      background-color: white;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 2px solid #333;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      color: #333;
+      margin: 0;
+      font-size: 28px;
+    }
+    .receipt-info {
+      margin-bottom: 30px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dotted #ccc;
+    }
+    .info-label {
+      font-weight: bold;
+      color: #555;
+    }
+    .info-value {
+      color: #333;
+    }
+    .amount {
+      font-size: 20px;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+    .print-btn {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .print-btn button {
+      padding: 10px 30px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    @media print {
+      .print-btn {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt-container">
+    <% if @order.nil? %>
+      <div class="header">
+        <h1>❌ 오류</h1>
+        <p>주문 정보를 찾을 수 없습니다.</p>
+      </div>
+      <script>
+        alert('주문 정보를 찾을 수 없습니다.');
+        window.close();
+      </script>
+    <% else %>
+    <div class="header">
+      <h1>🧾 결제 영수증</h1>
+      <p>Receipt / 領収書</p>
+    </div>
+
+    <div class="receipt-info">
+      <div class="info-row">
+        <span class="info-label">주문번호 (Order No.):</span>
+        <span class="info-value"><%= @order.order_no %></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">결제일시 (Payment Date):</span>
+        <span class="info-value"><%= @order.updated_at.strftime("%Y년 %m월 %d일 %H:%M") %></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">상품명 (Product):</span>
+        <span class="info-value"><%= @order.product_name %></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">구매자 (Buyer):</span>
+        <span class="info-value"><%= @order.buyer_name %></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">이메일 (Email):</span>
+        <span class="info-value"><%= @order.buyer_email %></span>
+      </div>
+      <% if @order.payment_method.present? %>
+      <div class="info-row">
+        <span class="info-label">결제수단 (Payment Method):</span>
+        <span class="info-value"><%= @order.payment_method %></span>
+      </div>
+      <% end %>
+      <div class="info-row">
+        <span class="info-label">결제상태 (Status):</span>
+        <span class="info-value">
+          <% if @order.status == "paid" %>
+            <span style="color: #2e7d32;">✓ 결제완료 (Paid)</span>
+          <% else %>
+            <span style="color: #d32f2f;"><%= @order.status %></span>
+          <% end %>
+        </span>
+      </div>
+      <div class="info-row" style="font-size: 18px; font-weight: bold; border-bottom: 2px solid #333; padding: 15px 0; margin-top: 20px;">
+        <span class="info-label">결제금액 (Amount):</span>
+        <span class="info-value amount"><%= number_to_currency(@order.amount, unit: "₩", format: "%u%n", delimiter: ",", precision: 0) %></span>
+      </div>
+    </div>
+
+    <div class="print-btn">
+      <button onclick="window.print()">🖨️ 인쇄하기</button>
+    </div>
+
+    <div class="footer">
+      <p>KCP Payments Rails - 전자결제 서비스</p>
+      <p>이 영수증은 전자결제 완료를 증명하는 문서입니다.</p>
+      <p>This receipt serves as proof of electronic payment completion.</p>
+    </div>
+    <% end %>
+  </div>
+
+  <script>
+    // 자동 프린트 (선택사항)
+    // window.onload = function() { window.print(); }
+  </script>
+</body>
+</html>
