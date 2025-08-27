@@ -32,7 +32,7 @@
         <td style="padding: 10px; border: 1px solid #ddd;">
           <%= link_to "상세보기", order_path(order) %>
           <% if order.status == "pending" %>
-            | <%= link_to "결제하기", new_payment_path(order_id: order.id) %>
+            | <%= link_to "결제하기", new_payment_path(order_id: order.id), data: { turbo: false } %>
           <% end %>
         </td>
       </tr>

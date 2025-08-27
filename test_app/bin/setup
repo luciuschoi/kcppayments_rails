@@ -32,3 +32,34 @@ FileUtils.chdir APP_ROOT do
     exec "bin/dev"
   end
 end
+
+
+def command_exists?(command)
+  system("command -v #{command} > /dev/null 2>&1")
+end
+
+# Install puma-dev if it's not installed
+
+unless command_exists?('brew')
+  puts "Homebrew is not installed. Please install Homebrew first."
+  exit 1
+end
+
+unless command_exists?('puma-dev')
+  puts "Installing puma-dev..."
+  system('brew install puma/puma/puma-dev')
+
+  puts "Running puma-dev setup..."
+  system('sudo puma-dev -setup')
+
+  puts "Installing puma-dev DNS settings..."
+  system('puma-dev -install')
+end
+
+# Link the current app to puma-dev
+
+puts "\n== Configuring Puma-dev to host https://app_name.test =="
+app_name = File.basename(APP_ROOT)
+
+system! "puma-dev link -n #{app_name}"
+puts "puma-dev setup complete for #{app_name}.test"

@@ -16,19 +16,19 @@
 <%= kcp_script_tag %>
 
 <!-- KCP 결제 폼 -->
-<form name="kcp_pay_form" 
-      id="kcp_pay_form" 
-      method="post" 
-      action="https://pay.kcp.co.kr/plugin/payplus_web.jsp"
-      target="_self"
-      data-controller="kcp"
-      data-kcp-order-id-value="<%= @order.order_no %>"
-      data-kcp-amount-value="<%= @order.amount %>"
-      data-kcp-buyer-name-value="<%= @order.buyer_name %>"
-      data-kcp-buyer-email-value="<%= @order.buyer_email %>"
-      data-kcp-product-name-value="<%= @order.product_name %>"
-      data-kcp-return-url-value="<%= callback_payments_url %>"
-      data-kcp-tax-free-amount-value="<%= @order.tax_free_amount %>">
+<form name="kcp_pay_form"
+  id="kcp_pay_form"
+  method="post"
+  action="<%= callback_payments_url %>"
+  target="_self"
+  data-controller="kcp"
+  data-kcp-order-id-value="<%= @order.order_no %>"
+  data-kcp-amount-value="<%= @order.amount %>"
+  data-kcp-buyer-name-value="<%= @order.buyer_name %>"
+  data-kcp-buyer-email-value="<%= @order.buyer_email %>"
+  data-kcp-product-name-value="<%= @order.product_name %>"
+  data-kcp-return-url-value="<%= callback_payments_url %>"
+  data-kcp-tax-free-amount-value="<%= @order.tax_free_amount %>">
 
   <!-- CSRF 토큰 -->
   <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
@@ -79,6 +79,17 @@
   <%= hidden_field_tag :user_agent, "" %>
   <%= hidden_field_tag :ipgm_name, "kcp" %>
   <%= hidden_field_tag :epay_no, "" %>
+  
+  <!-- KCP JavaScript가 요구하는 추가 필수 필드들 -->
+  <%= hidden_field_tag :encoding_trans, "UTF-8" %>
+  <%= hidden_field_tag :req_tx, "pay" %>
+  <%= hidden_field_tag :shop_name, "테스트몰" %>
+  <%= hidden_field_tag :lang_flag, "KOR" %>
+  <%= hidden_field_tag :site_logo, "" %>
+  <%= hidden_field_tag :req_ip, request.remote_ip %>
+  <%= hidden_field_tag :complex_yn, "N" %>
+  <%= hidden_field_tag :kcp_noti, "" %>
+  <%= hidden_field_tag :van_code, "" %>
   
   <!-- 세금 관련 -->
   <% if @order.tax_free_amount.present? && @order.tax_free_amount > 0 %>

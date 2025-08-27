@@ -8,11 +8,12 @@ KcppaymentsRails.configure do |config|
   
   # 개발 환경에서는 테스트 서버 사용
   if Rails.env.development?
-    config.gateway_url = "https://stg-spl.kcp.co.kr"
-    config.js_url = "https://pay.kcp.co.kr/plugin/payplus_web.jsp"
+    config.gateway_url = "https://testpaygw.kcp.co.kr"
+    config.js_url = "https://testpay.kcp.co.kr/plugin/payplus_web.jsp"
   else
-    config.gateway_url = "https://pay.kcp.co.kr"
+    config.gateway_url = "https://paygw.kcp.co.kr"
     config.js_url = "https://pay.kcp.co.kr/plugin/payplus_web.jsp"
+    config.kcp_cert_info = ENV["KCP_CERT_INFO"]
   end
   
   # 에스크로 사용 여부

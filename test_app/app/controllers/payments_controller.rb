@@ -63,4 +63,17 @@ class PaymentsController < ApplicationController
       Order.find(params[:order_id])
     end
   end
+
+  def receipt
+    @order = Order.find(params[:id])
+    
+    # 결제 완료된 주문만 영수증 출력 허용
+    unless @order.status == "paid"
+      redirect_to orders_path, alert: "결제가 완료된 주문만 영수증을 출력할 수 있습니다."
+      return
+    end
+    
+    # 영수증 출력용 레이아웃 사용 (또는 레이아웃 없이)
+    render layout: 'receipt'
+  end
 end

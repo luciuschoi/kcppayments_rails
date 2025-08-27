@@ -25,24 +25,131 @@ export default class extends Controller {
 
   connect() {
     // KCP 스크립트는 서버에서 include되어야 함 (kcp_script_tag)
+    console.log("KCP Controller connected");
+    
+    // 폼 존재 확인
+    const form = document.forms["kcp_pay_form"];
+    if (form) {
+      console.log("KCP form found on page load");
+      this.validateFormFields(form);
+      
+      // KCP 결제 완료 후 폼 submit을 가로채기 위한 리스너 추가
+      form.addEventListener('submit', this.handleFormSubmit.bind(this));
+    }
+    
+    // KCP 콜백 처리를 위한 전역 함수 등록
+    window.kcp_payment_complete = this.handleKcpCallback.bind(this);
+  }
+  
+  handleFormSubmit(event) {
+    console.log("=== Form Submit Intercepted ===");
+    console.log("Form data:", new FormData(event.target));
+    
+    // KCP에서 결과가 있는지 확인
+    const form = event.target;
+    const resCode = form.elements['res_cd']?.value;
+    
+    if (resCode) {
+      console.log("KCP result detected:", resCode);
+      // res_cd가 있으면 KCP에서 결과를 받은 것이므로 정상 진행
+      return true;
+    } else {
+      console.log("No KCP result - preventing default submit");
+      // 아직 KCP 처리가 안 되었으면 submit 방지
+      event.preventDefault();
+      return false;
+    }
+  }
+  
+  handleKcpCallback(result) {
+    console.log("=== KCP Callback Received ===");
+    console.log("Result:", result);
+    
+    const form = document.forms["kcp_pay_form"];
+    if (form && result) {
+      // 결과를 폼에 설정
+      if (form.elements['res_cd']) form.elements['res_cd'].value = result.res_cd || '';
+      if (form.elements['res_msg']) form.elements['res_msg'].value = result.res_msg || '';
+      if (form.elements['tno']) form.elements['tno'].value = result.tno || '';
+      
+      // 폼을 서버로 제출
+      form.submit();
+    }
+  }
+  
+  validateFormFields(form) {
+    console.log("=== Form Validation ===");
+    
+    // KCP 필수 필드 목록 (KCP 문서 기준)
+    const requiredFields = {
+      // 가맹점 정보
+      'site_cd': 'Site code (가맹점 코드)',
+      'site_name': 'Site name (가맹점명)',
+      
+      // 주문 정보
+      'ordr_idxx': 'Order ID (주문번호)',
+      'good_name': 'Product name (상품명)',
+      'good_mny': 'Amount (결제금액)',
+      
+      // 구매자 정보
+      'buyr_name': 'Buyer name (구매자명)',
+      'buyr_mail': 'Buyer email (구매자 이메일)',
+      'buyr_tel1': 'Buyer phone (구매자 전화)',
+      'buyr_tel2': 'Buyer phone (구매자 전화)',
+      
+      // 결제 설정
+      'pay_method': 'Payment method (결제수단)',
+      'curr_cd': 'Currency code (통화코드)',
+      'eng_flag': 'Language flag (언어)',
+      
+      // 추가 필수 필드
+      'req_tx': 'Request type (요청구분)',
+      'encoding_trans': 'Encoding (인코딩)'
+    };
+    
+    let missingFields = [];
+    let emptyFields = [];
+    
+    for (const [fieldName, description] of Object.entries(requiredFields)) {
+      const field = form.elements[fieldName];
+      if (!field) {
+        missingFields.push(`${fieldName} (${description})`);
+      } else if (!field.value || field.value.trim() === '') {
+        emptyFields.push(`${fieldName} (${description})`);
+      }
+    }
+    
+    if (missingFields.length > 0) {
+      console.error("MISSING FIELDS:", missingFields);
+    }
+    
+    if (emptyFields.length > 0) {
+      console.warn("EMPTY FIELDS:", emptyFields);
+    }
+    
+    if (missingFields.length === 0 && emptyFields.length === 0) {
+      console.log("✓ All required fields present and populated");
+    }
+    
+    return missingFields.length === 0;
   }
 
   requestPayment(event) {
     event?.preventDefault();
 
-    if (typeof window.KCP_Pay_Execute !== "function") {
-      console.error(
-        "KCP_Pay_Execute is not loaded. Make sure kcp_script_tag is included."
-      );
+    // 폼 찾기
+    const form = document.forms["kcp_pay_form"] || document.getElementById("kcp_pay_form");
+    if (!form) {
+      console.error("Form 'kcp_pay_form' not found");
       return;
     }
 
-    // 폼과 필드 확인
-    const form = document.forms["kcp_pay_form"] || document.getElementById("kcp_pay_form");
-    if (!form) {
-      console.error("Form not found");
-      return;
-    }
+    // KCP 스크립트 로드 확인
+    console.log("=== KCP Payment Debug ===");
+    console.log("Form found:", form.name || form.id);
+    console.log("KCP_Pay_Execute type:", typeof window.KCP_Pay_Execute);
+    console.log("Form action:", form.action);
+    console.log("Form method:", form.method);
 
     // 모든 폼 필드 확인
     console.log("All form elements:");
@@ -54,11 +161,21 @@ export default class extends Controller {
     }
     
     // KCP가 일반적으로 확인하는 필드들
-    const kcpFields = ['site_cd', 'ordr_idxx', 'good_mny', 'buyr_name', 'pay_method', 'curr_cd'];
+    const kcpFields = [
+      'site_cd', 'ordr_idxx', 'good_mny', 'buyr_name', 'pay_method', 'curr_cd',
+      'buyr_tel1', 'buyr_tel2', 'buyr_tel3', 'buyr_mail', 'good_name',
+      'Ret_URL', 'mod_type', 'eng_flag', 'shop_user_id'
+    ];
     console.log("\nKCP critical fields:");
     kcpFields.forEach(fieldName => {
       const field = form.elements[fieldName];
-      console.log(`${fieldName}:`, field ? `"${field.value}"` : 'NOT FOUND');
+      if (!field) {
+        console.error(`MISSING REQUIRED FIELD: ${fieldName}`);
+      } else if (!field.value || field.value.trim() === '') {
+        console.error(`EMPTY REQUIRED FIELD: ${fieldName}`);
+      } else {
+        console.log(`${fieldName}: "${field.value}"`);
+      }
     });
 
     // KCP JavaScript 함수 직접 확인
@@ -73,11 +190,40 @@ export default class extends Controller {
     
     // KCP JavaScript가 로드된 경우 실제 호출
     try {
-      console.log("Calling KCP_Pay_Execute...");
-      window.KCP_Pay_Execute("kcp_pay_form");
+      console.log("\n=== Attempting KCP_Pay_Execute ===");
+      
+      // KCP 함수가 폼 객체를 기대하는 경우를 위한 시도
+      if (form && typeof window.KCP_Pay_Execute === "function") {
+        // 다양한 호출 방식 시도
+        try {
+          console.log("Trying: KCP_Pay_Execute with form name string");
+          window.KCP_Pay_Execute("kcp_pay_form");
+        } catch (e1) {
+          console.error("Method 1 failed:", e1.message);
+          
+          try {
+            console.log("Trying: KCP_Pay_Execute with form object");
+            window.KCP_Pay_Execute(form);
+          } catch (e2) {
+            console.error("Method 2 failed:", e2.message);
+            
+            try {
+              console.log("Trying: KCP_Pay_Execute with no arguments");
+              window.KCP_Pay_Execute();
+            } catch (e3) {
+              console.error("Method 3 failed:", e3.message);
+              throw e1; // Re-throw original error
+            }
+          }
+        }
+      } else {
+        console.warn("KCP JavaScript not properly loaded");
+        this.runDemoPayment(form);
+      }
     } catch (e) {
       console.error("KCP_Pay_Execute failed:", e);
-      console.warn("Falling back to demo mode...");
+      console.error("Error stack:", e.stack);
+      console.warn("\nFalling back to demo mode...");
       this.runDemoPayment(form);
     }
   }

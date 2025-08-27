@@ -9,6 +9,9 @@ Rails.application.routes.draw do
       get :success
       get :failure
     end
+    member do
+      get :receipt
+    end
   end
   
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
