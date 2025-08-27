@@ -1,0 +1,41 @@
+<h1>주문 목록</h1>
+
+<%= link_to "새 주문 생성", new_order_path, class: "btn btn-primary" %>
+
+<table style="margin-top: 20px; border-collapse: collapse; width: 100%;">
+  <thead>
+    <tr style="background-color: #f0f0f0;">
+      <th style="padding: 10px; border: 1px solid #ddd;">주문번호</th>
+      <th style="padding: 10px; border: 1px solid #ddd;">상품명</th>
+      <th style="padding: 10px; border: 1px solid #ddd;">금액</th>
+      <th style="padding: 10px; border: 1px solid #ddd;">구매자</th>
+      <th style="padding: 10px; border: 1px solid #ddd;">상태</th>
+      <th style="padding: 10px; border: 1px solid #ddd;">액션</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders.each do |order| %>
+      <tr>
+        <td style="padding: 10px; border: 1px solid #ddd;"><%= order.order_no %></td>
+        <td style="padding: 10px; border: 1px solid #ddd;"><%= order.product_name %></td>
+        <td style="padding: 10px; border: 1px solid #ddd;"><%= number_to_currency(order.amount, unit: "₩", format: "%u%n", delimiter: ",", precision: 0) %></td>
+        <td style="padding: 10px; border: 1px solid #ddd;"><%= order.buyer_name %></td>
+        <td style="padding: 10px; border: 1px solid #ddd;">
+          <% if order.status == "paid" %>
+            <span style="color: green;">결제완료</span>
+          <% elsif order.status == "failed" %>
+            <span style="color: red;">결제실패</span>
+          <% else %>
+            <span style="color: orange;">대기중</span>
+          <% end %>
+        </td>
+        <td style="padding: 10px; border: 1px solid #ddd;">
+          <%= link_to "상세보기", order_path(order) %>
+          <% if order.status == "pending" %>
+            | <%= link_to "결제하기", new_payment_path(order_id: order.id) %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

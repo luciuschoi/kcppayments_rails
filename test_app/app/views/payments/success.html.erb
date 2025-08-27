@@ -1,0 +1,31 @@
+<h1 style="color: green;">✓ 결제 성공</h1>
+
+<% if @demo_mode %>
+<div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffc107; margin-bottom: 20px;">
+  <h4 style="color: #856404; margin-top: 0;">🧪 데모 모드</h4>
+  <p style="color: #856404; margin-bottom: 0;">
+    이는 젬 기능을 테스트하기 위한 데모 결제입니다.<br>
+    실제 KCP 계정을 설정하면 실제 결제가 처리됩니다.
+  </p>
+</div>
+<% end %>
+
+<div style="background-color: #e8f5e9; padding: 20px; border-radius: 5px; border: 1px solid #4CAF50;">
+  <h2><%= @demo_mode ? "데모 결제가 성공적으로 완료되었습니다!" : "결제가 성공적으로 완료되었습니다!" %></h2>
+  
+  <div style="margin-top: 20px;">
+    <p><strong>주문번호:</strong> <%= @order.order_no %></p>
+    <p><strong>상품명:</strong> <%= @order.product_name %></p>
+    <p><strong>결제금액:</strong> <%= number_to_currency(@order.amount, unit: "₩", format: "%u%n", delimiter: ",", precision: 0) %></p>
+    <p><strong>구매자:</strong> <%= @order.buyer_name %> (<%= @order.buyer_email %>)</p>
+    <% if @order.payment_method.present? %>
+      <p><strong>결제수단:</strong> <%= @order.payment_method %></p>
+    <% end %>
+  </div>
+</div>
+
+<div style="margin-top: 20px;">
+  <%= link_to "주문 상세보기", order_path(@order), 
+      style: "padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 3px;" %>
+  <%= link_to "주문 목록", orders_path, style: "margin-left: 10px;" %>
+</div>

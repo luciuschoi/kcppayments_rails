@@ -1,0 +1,32 @@
+<h1>주문 상세</h1>
+
+<div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px;">
+  <p><strong>주문번호:</strong> <%= @order.order_no %></p>
+  <p><strong>상품명:</strong> <%= @order.product_name %></p>
+  <p><strong>금액:</strong> <%= number_to_currency(@order.amount, unit: "₩", format: "%u%n", delimiter: ",", precision: 0) %></p>
+  <% if @order.tax_free_amount.present? && @order.tax_free_amount > 0 %>
+    <p><strong>면세금액:</strong> <%= number_to_currency(@order.tax_free_amount, unit: "₩", format: "%u%n", delimiter: ",", precision: 0) %></p>
+  <% end %>
+  <p><strong>구매자명:</strong> <%= @order.buyer_name %></p>
+  <p><strong>구매자 이메일:</strong> <%= @order.buyer_email %></p>
+  <p><strong>상태:</strong> 
+    <% if @order.status == "paid" %>
+      <span style="color: green;">결제완료</span>
+    <% elsif @order.status == "failed" %>
+      <span style="color: red;">결제실패</span>
+    <% else %>
+      <span style="color: orange;">대기중</span>
+    <% end %>
+  </p>
+  <% if @order.payment_method.present? %>
+    <p><strong>결제수단:</strong> <%= @order.payment_method %></p>
+  <% end %>
+</div>
+
+<div style="margin-top: 20px;">
+  <% if @order.status == "pending" %>
+    <%= link_to "결제하기", new_payment_path(order_id: @order.id), 
+        style: "padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 3px;" %>
+  <% end %>
+  <%= link_to "목록으로", orders_path, style: "margin-left: 10px;" %>
+</div>

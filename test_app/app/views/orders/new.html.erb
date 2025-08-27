@@ -1,0 +1,44 @@
+<h1>새 주문 생성</h1>
+
+<%= form_with model: @order do |form| %>
+  <% if @order.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= @order.errors.count %> 개의 오류가 발생했습니다:</h2>
+      <ul>
+        <% @order.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :product_name, "상품명" %>
+    <%= form.text_field :product_name, style: "width: 300px; padding: 5px;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :amount, "금액" %>
+    <%= form.number_field :amount, style: "width: 200px; padding: 5px;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :buyer_name, "구매자명" %>
+    <%= form.text_field :buyer_name, style: "width: 200px; padding: 5px;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :buyer_email, "구매자 이메일" %>
+    <%= form.email_field :buyer_email, style: "width: 300px; padding: 5px;" %>
+  </div>
+
+  <div style="margin-bottom: 15px;">
+    <%= form.label :tax_free_amount, "면세 금액 (선택사항)" %>
+    <%= form.number_field :tax_free_amount, style: "width: 200px; padding: 5px;" %>
+  </div>
+
+  <div>
+    <%= form.submit "주문 생성", style: "padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;" %>
+    <%= link_to "취소", orders_path, style: "margin-left: 10px;" %>
+  </div>
+<% end %>

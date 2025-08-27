@@ -1,0 +1,134 @@
+<h1>KCP 결제</h1>
+
+<div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+  <h2>주문 정보</h2>
+  <p><strong>주문번호:</strong> <%= @order.order_no %></p>
+  <p><strong>상품명:</strong> <%= @order.product_name %></p>
+  <p><strong>결제금액:</strong> <%= number_to_currency(@order.amount, unit: "₩", format: "%u%n", delimiter: ",", precision: 0) %></p>
+  <% if @order.tax_free_amount.present? && @order.tax_free_amount > 0 %>
+    <p><strong>면세금액:</strong> <%= number_to_currency(@order.tax_free_amount, unit: "₩", format: "%u%n", delimiter: ",", precision: 0) %></p>
+  <% end %>
+  <p><strong>구매자명:</strong> <%= @order.buyer_name %></p>
+  <p><strong>구매자 이메일:</strong> <%= @order.buyer_email %></p>
+</div>
+
+<!-- KCP 결제 스크립트 로드 -->
+<%= kcp_script_tag %>
+
+<!-- KCP 결제 폼 -->
+<form name="kcp_pay_form" 
+      id="kcp_pay_form" 
+      method="post" 
+      action="https://pay.kcp.co.kr/plugin/payplus_web.jsp"
+      target="_self"
+      data-controller="kcp"
+      data-kcp-order-id-value="<%= @order.order_no %>"
+      data-kcp-amount-value="<%= @order.amount %>"
+      data-kcp-buyer-name-value="<%= @order.buyer_name %>"
+      data-kcp-buyer-email-value="<%= @order.buyer_email %>"
+      data-kcp-product-name-value="<%= @order.product_name %>"
+      data-kcp-return-url-value="<%= callback_payments_url %>"
+      data-kcp-tax-free-amount-value="<%= @order.tax_free_amount %>">
+
+  <!-- CSRF 토큰 -->
+  <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+  
+  <!-- KCP 필수 hidden 필드들 -->
+  <%= hidden_field_tag :site_cd, KcppaymentsRails.configuration.site_cd %>
+  <%= hidden_field_tag :site_name, "테스트몰" %>
+  <%= hidden_field_tag :ordr_idxx, @order.order_no %>
+  <%= hidden_field_tag :good_name, @order.product_name %>
+  <%= hidden_field_tag :good_mny, @order.amount %>
+  <%= hidden_field_tag :curr_cd, "410" %>
+  <%= hidden_field_tag :shop_user_id, @order.buyer_email %>
+  <%= hidden_field_tag :buyr_name, @order.buyer_name %>
+  <%= hidden_field_tag :buyr_mail, @order.buyer_email %>
+  <%= hidden_field_tag :buyr_tel1, "010" %>
+  <%= hidden_field_tag :buyr_tel2, "1234" %>
+  <%= hidden_field_tag :buyr_tel3, "5678" %>
+  <%= hidden_field_tag :mod_type, "0" %>
+  <%= hidden_field_tag :mod_ip, request.remote_ip %>
+  <%= hidden_field_tag :mod_desc, "주문변경" %>
+  
+  <!-- 결제 처리를 위한 추가 필드 -->
+  <%= hidden_field_tag :Ret_URL, callback_payments_url %>
+  <%= hidden_field_tag :ReturnURL, callback_payments_url %>
+  <%= hidden_field_tag :approval_key, "" %>
+  <%= hidden_field_tag :traceNo, "" %>
+  
+  <!-- 수령자 정보 -->
+  <%= hidden_field_tag :rcvr_name, @order.buyer_name %>
+  <%= hidden_field_tag :rcvr_tel1, "010" %>
+  <%= hidden_field_tag :rcvr_tel2, "1234" %>
+  <%= hidden_field_tag :rcvr_tel3, "5678" %>
+  <%= hidden_field_tag :rcvr_mail, @order.buyer_email %>
+  <%= hidden_field_tag :rcvr_zipx, "12345" %>
+  <%= hidden_field_tag :rcvr_add1, "서울시 강남구" %>
+  <%= hidden_field_tag :rcvr_add2, "테스트 주소" %>
+  
+  <!-- 결제 옵션 -->
+  <%= hidden_field_tag :quotaopt, "12" %>
+  <%= hidden_field_tag :escw_used, "N" %>
+  <%= hidden_field_tag :card_cop, "10300" %>
+  <%= hidden_field_tag :kcp_cert, "true" %>
+  <%= hidden_field_tag :disp_tax_yn, "N" %>
+  <%= hidden_field_tag :vcnt_expire_term, "" %>
+  <%= hidden_field_tag :vcnt_expire_term_time, "" %>
+  <%= hidden_field_tag :bask_cntx, "0" %>
+  <%= hidden_field_tag :eng_flag, "N" %>
+  <%= hidden_field_tag :user_agent, "" %>
+  <%= hidden_field_tag :ipgm_name, "kcp" %>
+  <%= hidden_field_tag :epay_no, "" %>
+  
+  <!-- 세금 관련 -->
+  <% if @order.tax_free_amount.present? && @order.tax_free_amount > 0 %>
+    <%= hidden_field_tag :tax_flag, "TG03" %>
+    <%= hidden_field_tag :comm_tax_mny, (@order.amount - @order.tax_free_amount) %>
+    <%= hidden_field_tag :comm_free_mny, @order.tax_free_amount %>
+  <% else %>
+    <%= hidden_field_tag :tax_flag, "TG01" %>
+    <%= hidden_field_tag :comm_tax_mny, @order.amount %>
+    <%= hidden_field_tag :comm_free_mny, "0" %>
+  <% end %>
+
+  <!-- KCP 처리 결과 필드들 -->
+  <%= hidden_field_tag :res_cd, "" %>
+  <%= hidden_field_tag :res_msg, "" %>
+  <%= hidden_field_tag :tno, "" %>
+  <%= hidden_field_tag :trace_no, "" %>
+  <%= hidden_field_tag :enc_info, "" %>
+  <%= hidden_field_tag :enc_data, "" %>
+  <%= hidden_field_tag :ret_pay_method, "" %>
+  <%= hidden_field_tag :trad_date, "" %>
+  <%= hidden_field_tag :trad_time, "" %>
+  <%= hidden_field_tag :bank_name, "" %>
+  <%= hidden_field_tag :bank_issu, "" %>
+
+  <!-- 결제 수단 선택 -->
+  <%= hidden_field_tag :pay_method, "100000000000" %>
+  
+  <div style="margin-bottom: 20px;">
+    <h3>결제 수단 선택</h3>
+    <label>
+      <%= radio_button_tag "pay_method_display", "card", true, onclick: "document.getElementsByName('pay_method')[0].value='100000000000'" %>
+      신용카드
+    </label>
+    <label style="margin-left: 20px;">
+      <%= radio_button_tag "pay_method_display", "transfer", false, onclick: "document.getElementsByName('pay_method')[0].value='010000000000'" %>
+      계좌이체
+    </label>
+    <label style="margin-left: 20px;">
+      <%= radio_button_tag "pay_method_display", "vbank", false, onclick: "document.getElementsByName('pay_method')[0].value='001000000000'" %>
+      가상계좌
+    </label>
+  </div>
+
+  <div>
+    <%= button_tag "결제하기",
+        type: "button",
+        data: { action: "click->kcp#requestPayment" },
+        style: "padding: 10px 30px; background-color: #FF5722; color: white; border: none; cursor: pointer; font-size: 16px; border-radius: 3px;" %>
+
+    <%= link_to "취소", order_path(@order), style: "margin-left: 10px;" %>
+  </div>
+</form>

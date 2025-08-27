@@ -1,0 +1,20 @@
+<h1 style="color: red;">✗ 결제 실패</h1>
+
+<div style="background-color: #ffebee; padding: 20px; border-radius: 5px; border: 1px solid #f44336;">
+  <h2>결제가 실패했습니다.</h2>
+  
+  <p>결제 처리 중 문제가 발생했습니다. 다시 시도해 주세요.</p>
+  
+  <div style="margin-top: 20px;">
+    <p><strong>주문번호:</strong> <%= @order.order_no %></p>
+    <p><strong>상품명:</strong> <%= @order.product_name %></p>
+    <p><strong>결제금액:</strong> <%= number_to_currency(@order.amount, unit: "₩", format: "%u%n", delimiter: ",", precision: 0) %></p>
+  </div>
+</div>
+
+<div style="margin-top: 20px;">
+  <%= link_to "다시 결제하기", new_payment_path(order_id: @order.id), 
+      style: "padding: 10px 20px; background-color: #FF5722; color: white; text-decoration: none; border-radius: 3px;" %>
+  <%= link_to "주문 상세보기", order_path(@order), style: "margin-left: 10px;" %>
+  <%= link_to "주문 목록", orders_path, style: "margin-left: 10px;" %>
+</div>
