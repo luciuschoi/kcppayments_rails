@@ -3,6 +3,7 @@
 require_relative "kcppayments_rails/version"
 require_relative "kcppayments_rails/configuration"
 require_relative "kcppayments_rails/client"
+require_relative "kcppayments_rails/helpers/kcp_helper"
 
 begin
   require_relative "kcppayments_rails/engine"

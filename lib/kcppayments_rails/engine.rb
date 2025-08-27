@@ -8,8 +8,11 @@ module KcppaymentsRails
 
     initializer "kcppayments_rails.view_helpers" do
       ActiveSupport.on_load(:action_view) do
-        require_relative "helpers/kcp_helper"
         include KcppaymentsRails::KcpHelper
+      end
+      
+      ActiveSupport.on_load(:action_controller) do
+        helper KcppaymentsRails::KcpHelper
       end
     end
   end
